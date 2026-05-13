@@ -12,9 +12,17 @@
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px} label{font-weight:700;font-size:13px} input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:12px;padding:10px;background:#fff;font:inherit} textarea{min-height:42px;resize:vertical}
 .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px} .metric{background:#fafafa;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center} .metric b{display:block;font-size:26px;color:var(--accent)}
 .progress{height:12px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-top:12px} .bar{height:100%;width:0;background:var(--accent);transition:.25s}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px} button{border:0;border-radius:12px;padding:11px 16px;font-weight:800;cursor:pointer;background:#111827;color:#fff} button.secondary{background:#fff;color:#111827;border:1px solid #d1d5db}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{border:0;border-radius:12px;padding:11px 16px;font-weight:800;cursor:pointer;background:#111827;color:#fff}
+button.secondary{background:#fff;color:#111827;border:1px solid #d1d5db}
+button.save-btn{background:linear-gradient(135deg,#b78a45,#d4a55a);color:#fff;font-size:15px;padding:13px 28px;}
+button.save-btn:disabled{opacity:.6;cursor:not-allowed}
 table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:18px;border:1px solid var(--line)} th{background:#111827;color:white;padding:12px;text-align:right} td{border-top:1px solid var(--line);padding:10px;vertical-align:middle;background:#fff} tr.section td{background:#efe6d8!important;color:#111827;font-weight:900;font-size:16px} .num{width:56px;text-align:center;font-weight:800} .check{width:72px;text-align:center} .check input{width:24px;height:24px;accent-color:#b78a45} .task{min-width:360px} .priority{white-space:nowrap;font-weight:700} [contenteditable="true"]{outline:2px solid transparent;border-radius:8px} [contenteditable="true"]:focus{outline-color:#d6b16d;background:#fff8e8}
 .footer{font-size:12px;color:#6b7280;text-align:center;margin:20px 0}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:14px 28px;border-radius:16px;font-weight:700;font-size:15px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.success{background:#16a34a}
+.toast.error{background:#dc2626}
 @media(max-width:800px){.grid,.summary{grid-template-columns:1fr} .container{padding:12px} table{font-size:13px} .task{min-width:220px}}
 @media print{.actions{display:none} body{background:#fff} .card,.hero{box-shadow:none}}
 </style>
@@ -35,198 +43,229 @@ table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;borde
 </section>
 <div class="progress"><div class="bar" id="bar"></div></div>
 <section class="card">
-<div class="actions"><button onclick="exportCSV()">تصدير CSV</button><button onclick="window.print()">طباعة PDF</button><button class="secondary" onclick="clearForm()">تفريغ النموذج</button></div>
+<div class="actions">
+<button onclick="exportCSV()">تصدير CSV</button>
+<button onclick="window.print()">طباعة PDF</button>
+<button class="secondary" onclick="clearForm()">تفريغ النموذج</button>
+</div>
 </section>
-<section class="card"><table><thead><tr><th>#</th><th>البند</th><th>تم</th><th>ملاحظات</th><th>الأولوية</th></tr></thead><tbody><tr class="section"><td colspan="5">🌅 الاجتماع الصباحي</td></tr>
-<tr data-task>
-<td class="num">1</td><td class="task" contenteditable="true">تحديد هدف كل موظف لليوم ومراجعة أهداف أمس</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">2</td><td class="task" contenteditable="true">مراجعة مبيعات أمس مقارنةً بالهدف</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">3</td><td class="task" contenteditable="true">مناقشة الأخطاء التشغيلية من اليوم السابق وحلولها</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">4</td><td class="task" contenteditable="true">إبلاغ الفريق بأي تعليمات أو عروض جديدة من الإدارة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
+<section class="card"><table><thead><tr><th>#</th><th>البند</th><th>تم</th><th>ملاحظات</th><th>الأولوية</th></tr></thead><tbody>
+<tr class="section"><td colspan="5">🌅 الاجتماع الصباحي</td></tr>
+<tr data-task><td class="num">1</td><td class="task" contenteditable="true">تحديد هدف كل موظف لليوم ومراجعة أهداف أمس</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">2</td><td class="task" contenteditable="true">مراجعة مبيعات أمس مقارنةً بالهدف</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">3</td><td class="task" contenteditable="true">مناقشة الأخطاء التشغيلية من اليوم السابق وحلولها</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">4</td><td class="task" contenteditable="true">إبلاغ الفريق بأي تعليمات أو عروض جديدة من الإدارة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
 <tr class="section"><td colspan="5">🏪 الحالة العامة للفرع</td></tr>
-<tr data-task>
-<td class="num">5</td><td class="task" contenteditable="true">نظافة الفرع من الداخل (أرضيات - رفوف - فتارين)</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">6</td><td class="task" contenteditable="true">الواجهة الخارجية نظيفة وجاهزة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">7</td><td class="task" contenteditable="true">نظافة غرفة القياس وخلوها من المرتجعات</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">8</td><td class="task" contenteditable="true">المعطّر والتكييف والإضاءة تعمل بشكل سليم</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
-<tr data-task>
-<td class="num">9</td><td class="task" contenteditable="true">قائمة الأغاني مناسبة (افتتاح وإغلاق)</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟢 منخفض</td></tr>
-<tr data-task>
-<td class="num">10</td><td class="task" contenteditable="true">الجاهزية العامة للفرع قبل الفتح</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">11</td><td class="task" contenteditable="true">التحقق من عمل الواي فاي والأجهزة الإلكترونية</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">5</td><td class="task" contenteditable="true">نظافة الفرع من الداخل (أرضيات - رفوف - فتارين)</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">6</td><td class="task" contenteditable="true">الواجهة الخارجية نظيفة وجاهزة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">7</td><td class="task" contenteditable="true">نظافة غرفة القياس وخلوها من المرتجعات</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">8</td><td class="task" contenteditable="true">المعطّر والتكييف والإضاءة تعمل بشكل سليم</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
+<tr data-task><td class="num">9</td><td class="task" contenteditable="true">قائمة الأغاني مناسبة (افتتاح وإغلاق)</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟢 منخفض</td></tr>
+<tr data-task><td class="num">10</td><td class="task" contenteditable="true">الجاهزية العامة للفرع قبل الفتح</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">11</td><td class="task" contenteditable="true">التحقق من عمل الواي فاي والأجهزة الإلكترونية</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
 <tr class="section"><td colspan="5">👔 الموظفون</td></tr>
-<tr data-task>
-<td class="num">12</td><td class="task" contenteditable="true">الشكل العام - الحلاقة - النظافة الشخصية - الرائحة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">13</td><td class="task" contenteditable="true">الزي الموحد مكتمل وبطاقة التعريف ظاهرة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">14</td><td class="task" contenteditable="true">الأظافر نظيفة ومرتبة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
-<tr data-task>
-<td class="num">15</td><td class="task" contenteditable="true">بصمة الحضور والانصراف مسجلة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">16</td><td class="task" contenteditable="true">الالتزام بسياسة الجوال أثناء الدوام</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">17</td><td class="task" contenteditable="true">رضا الفريق وأي ملاحظات سلوكية</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
+<tr data-task><td class="num">12</td><td class="task" contenteditable="true">الشكل العام - الحلاقة - النظافة الشخصية - الرائحة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">13</td><td class="task" contenteditable="true">الزي الموحد مكتمل وبطاقة التعريف ظاهرة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">14</td><td class="task" contenteditable="true">الأظافر نظيفة ومرتبة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
+<tr data-task><td class="num">15</td><td class="task" contenteditable="true">بصمة الحضور والانصراف مسجلة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">16</td><td class="task" contenteditable="true">الالتزام بسياسة الجوال أثناء الدوام</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">17</td><td class="task" contenteditable="true">رضا الفريق وأي ملاحظات سلوكية</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
 <tr class="section"><td colspan="5">🔒 الأمن والسلامة</td></tr>
-<tr data-task>
-<td class="num">18</td><td class="task" contenteditable="true">طفايات الحريق: الصلاحية - الموقع - السلامة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">19</td><td class="task" contenteditable="true">صندوق الإسعافات الأولية مكتمل وصالح</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">20</td><td class="task" contenteditable="true">مخارج الطوارئ خالية من العوائق</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">21</td><td class="task" contenteditable="true">خطة الإخلاء معلقة وواضحة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">18</td><td class="task" contenteditable="true">طفايات الحريق: الصلاحية - الموقع - السلامة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">19</td><td class="task" contenteditable="true">صندوق الإسعافات الأولية مكتمل وصالح</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">20</td><td class="task" contenteditable="true">مخارج الطوارئ خالية من العوائق</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">21</td><td class="task" contenteditable="true">خطة الإخلاء معلقة وواضحة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
 <tr class="section"><td colspan="5">💰 نقطة البيع (Cash Point)</td></tr>
-<tr data-task>
-<td class="num">22</td><td class="task" contenteditable="true">جميع أجهزة POS تعمل لكل طرق الدفع (كاش - شبكة - تابي - تمارا)</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">23</td><td class="task" contenteditable="true">مخزون كافٍ من أكياس البيع وورق الكاشير والفيزا</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">24</td><td class="task" contenteditable="true">طي القطع ووضعها بشكل مرتب داخل أكياس البيع</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
-<tr data-task>
-<td class="num">25</td><td class="task" contenteditable="true">جرد مفاجئ للصندوق خلال اليوم</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">26</td><td class="task" contenteditable="true">المرتجعات: توقيع المدير - مراجعة القطعة - اتباع سياسة الشركة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">27</td><td class="task" contenteditable="true">تسليم مبلغ الصندوق للمشرف المسؤول بعد الجرد</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">22</td><td class="task" contenteditable="true">جميع أجهزة POS تعمل لكل طرق الدفع (كاش - شبكة - تابي - تمارا)</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">23</td><td class="task" contenteditable="true">مخزون كافٍ من أكياس البيع وورق الكاشير والفيزا</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">24</td><td class="task" contenteditable="true">طي القطع ووضعها بشكل مرتب داخل أكياس البيع</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
+<tr data-task><td class="num">25</td><td class="task" contenteditable="true">جرد مفاجئ للصندوق خلال اليوم</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">26</td><td class="task" contenteditable="true">المرتجعات: توقيع المدير - مراجعة القطعة - اتباع سياسة الشركة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">27</td><td class="task" contenteditable="true">تسليم مبلغ الصندوق للمشرف المسؤول بعد الجرد</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
 <tr class="section"><td colspan="5">📦 المخزون (Stock)</td></tr>
-<tr data-task>
-<td class="num">28</td><td class="task" contenteditable="true">استخراج نواقص العرض (مقاسات - موديلات جديدة)</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">29</td><td class="task" contenteditable="true">استلام البضاعة وفق معايير الشركة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">30</td><td class="task" contenteditable="true">لا توجد استلامات معلقة أو بضاعة غير مدرجة في النظام</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">31</td><td class="task" contenteditable="true">التحويلات الخارجية تتبع إجراءات الشركة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">32</td><td class="task" contenteditable="true">التسعير مطابق للسيستم ومراجعة أي تعديلات واردة من الإدارة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">33</td><td class="task" contenteditable="true">المنطقة الخلفية نظيفة وخالية من الكراتين والعوائق</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">34</td><td class="task" contenteditable="true">المخازن (داخلية وخارجية) نظيفة ومرتبة وفق سياسة الشركة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">28</td><td class="task" contenteditable="true">استخراج نواقص العرض (مقاسات - موديلات جديدة)</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">29</td><td class="task" contenteditable="true">استلام البضاعة وفق معايير الشركة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">30</td><td class="task" contenteditable="true">لا توجد استلامات معلقة أو بضاعة غير مدرجة في النظام</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">31</td><td class="task" contenteditable="true">التحويلات الخارجية تتبع إجراءات الشركة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">32</td><td class="task" contenteditable="true">التسعير مطابق للسيستم ومراجعة أي تعديلات واردة من الإدارة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">33</td><td class="task" contenteditable="true">المنطقة الخلفية نظيفة وخالية من الكراتين والعوائق</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">34</td><td class="task" contenteditable="true">المخازن (داخلية وخارجية) نظيفة ومرتبة وفق سياسة الشركة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
 <tr class="section"><td colspan="5">🖼️ العرض البصري (Visual Merchandising)</td></tr>
-<tr data-task>
-<td class="num">35</td><td class="task" contenteditable="true">اتباع معايير الشركة في عرض البضاعة بالتنسيق مع مسؤول VM</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">36</td><td class="task" contenteditable="true">مراجعة STORE PROJECT والتأكد من ممرات مناسبة للعملاء</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
-<tr data-task>
-<td class="num">37</td><td class="task" contenteditable="true">الشماعات - أجهزة الإنذار - التسعير - ترتيب المقاسات صحيح</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">38</td><td class="task" contenteditable="true">المانيكانات - الرفوف - الواجهات الخارجية - اللوجو نظيفة</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">39</td><td class="task" contenteditable="true">شاشات العرض تعرض المحتوى الصحيح وفق العروض والمواسم</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
+<tr data-task><td class="num">35</td><td class="task" contenteditable="true">اتباع معايير الشركة في عرض البضاعة بالتنسيق مع مسؤول VM</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">36</td><td class="task" contenteditable="true">مراجعة STORE PROJECT والتأكد من ممرات مناسبة للعملاء</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
+<tr data-task><td class="num">37</td><td class="task" contenteditable="true">الشماعات - أجهزة الإنذار - التسعير - ترتيب المقاسات صحيح</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">38</td><td class="task" contenteditable="true">المانيكانات - الرفوف - الواجهات الخارجية - اللوجو نظيفة</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">39</td><td class="task" contenteditable="true">شاشات العرض تعرض المحتوى الصحيح وفق العروض والمواسم</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟡 متوسط</td></tr>
 <tr class="section"><td colspan="5">📊 متابعة المبيعات</td></tr>
-<tr data-task>
-<td class="num">40</td><td class="task" contenteditable="true">مبيعات اليوم حتى الآن مقارنةً بالهدف اليومي</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
-<tr data-task>
-<td class="num">41</td><td class="task" contenteditable="true">متابعة غرف القياس كل 30 دقيقة وخلوها من المرتجعات</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
-<tr data-task>
-<td class="num">42</td><td class="task" contenteditable="true">ملاحظات على شكاوى أو إطراء العملاء خلال اليوم</td>
-<td class="check"><input type="checkbox" aria-label="تم"></td>
-<td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr></tbody></table></section>
-<section class="card"><label>ملاحظات ختامية</label><textarea id="finalNotes" placeholder="اكتب الملاحظات الختامية هنا"></textarea><br><br><label>التوقيع</label><input id="signature" placeholder="اسم وتوقيع المسؤول"></section>
+<tr data-task><td class="num">40</td><td class="task" contenteditable="true">مبيعات اليوم حتى الآن مقارنةً بالهدف اليومي</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🔴 حرج</td></tr>
+<tr data-task><td class="num">41</td><td class="task" contenteditable="true">متابعة غرف القياس كل 30 دقيقة وخلوها من المرتجعات</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+<tr data-task><td class="num">42</td><td class="task" contenteditable="true">ملاحظات على شكاوى أو إطراء العملاء خلال اليوم</td><td class="check"><input type="checkbox" aria-label="تم"></td><td><textarea placeholder="ملاحظات"></textarea></td><td class="priority">🟠 عالي</td></tr>
+</tbody></table></section>
+
+<section class="card">
+<label>ملاحظات ختامية</label>
+<textarea id="finalNotes" placeholder="اكتب الملاحظات الختامية هنا"></textarea>
+<br><br>
+<label>التوقيع</label>
+<input id="signature" placeholder="اسم وتوقيع المسؤول">
+<br><br>
+<div class="actions">
+  <button class="save-btn" id="submitBtn" onclick="submitToSupabase()">💾 حفظ وإرسال إلى قاعدة البيانات</button>
+</div>
+</section>
+
 <div class="footer">Outfit Daily Checklist</div>
 </div>
-<script>
-const KEY='outfit_daily_checklist_v3';
-function fields(){return [...document.querySelectorAll('input, select, textarea, [contenteditable="true"]')];}
-function updateSummary(){const tasks=[...document.querySelectorAll('tr[data-task]')]; const done=tasks.filter(r=>r.querySelector('input[type="checkbox"]').checked).length; const total=tasks.length; const p=total?Math.round(done/total*100):0; document.getElementById('total').textContent=total;document.getElementById('done').textContent=done;document.getElementById('remain').textContent=total-done;document.getElementById('percent').textContent=p+'%';document.getElementById('bar').style.width=p+'%'; save();}
-function save(){const data={}; fields().forEach((el,i)=>{if(el.type==='checkbox')data[i]=el.checked;else if(el.isContentEditable)data[i]=el.innerText;else data[i]=el.value;}); localStorage.setItem(KEY,JSON.stringify(data));}
-function load(){const data=JSON.parse(localStorage.getItem(KEY)||'{}'); fields().forEach((el,i)=>{if(data[i]!==undefined){if(el.type==='checkbox')el.checked=data[i];else if(el.isContentEditable)el.innerText=data[i];else el.value=data[i];}}); if(!document.getElementById('date').value) document.getElementById('date').value=new Date().toISOString().slice(0,10); updateSummary();}
-fields().forEach(el=>{el.addEventListener('input',updateSummary);el.addEventListener('change',updateSummary);});
-function clearForm(){if(confirm('هل تريد تفريغ النموذج؟')){localStorage.removeItem(KEY); location.reload();}}
-function csvCell(v){return '"'+String(v||'').replaceAll('"','""')+'"';}
-function exportCSV(){let rows=[['الفرع',branch.value],['التاريخ',date.value],['اسم المفتش',inspector.value],['الوردية',shift.value],[],['#','البند','تم','ملاحظات','الأولوية']]; document.querySelectorAll('tr[data-task]').forEach(r=>{rows.push([r.children[0].innerText,r.children[1].innerText,r.querySelector('input').checked?'تم':'لم يتم',r.querySelector('textarea').value,r.children[4].innerText]);}); rows.push([],['ملاحظات ختامية',finalNotes.value],['التوقيع',signature.value]); let csv='﻿'+rows.map(row=>row.map(csvCell).join(',')).join('
-'); let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})); a.download='outfit-daily-checklist.csv'; a.click();}
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://rtbtomktsagpfisgnwrq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_thHgcnJG3HM-ZRbSylo4HA_vo6A_BOK';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const KEY = 'outfit_daily_checklist_v3';
+
+function fields() {
+  return [...document.querySelectorAll('input, select, textarea, [contenteditable="true"]')];
+}
+
+function updateSummary() {
+  const tasks = [...document.querySelectorAll('tr[data-task]')];
+  const done = tasks.filter(r => r.querySelector('input[type="checkbox"]').checked).length;
+  const total = tasks.length;
+  const p = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('total').textContent = total;
+  document.getElementById('done').textContent = done;
+  document.getElementById('remain').textContent = total - done;
+  document.getElementById('percent').textContent = p + '%';
+  document.getElementById('bar').style.width = p + '%';
+  save();
+}
+
+function save() {
+  const data = {};
+  fields().forEach((el, i) => {
+    if (el.type === 'checkbox') data[i] = el.checked;
+    else if (el.isContentEditable) data[i] = el.innerText;
+    else data[i] = el.value;
+  });
+  localStorage.setItem(KEY, JSON.stringify(data));
+}
+
+function load() {
+  const data = JSON.parse(localStorage.getItem(KEY) || '{}');
+  fields().forEach((el, i) => {
+    if (data[i] !== undefined) {
+      if (el.type === 'checkbox') el.checked = data[i];
+      else if (el.isContentEditable) el.innerText = data[i];
+      else el.value = data[i];
+    }
+  });
+  if (!document.getElementById('date').value)
+    document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+  updateSummary();
+}
+
+fields().forEach(el => {
+  el.addEventListener('input', updateSummary);
+  el.addEventListener('change', updateSummary);
+});
+
+function clearForm() {
+  if (confirm('هل تريد تفريغ النموذج؟')) {
+    localStorage.removeItem(KEY);
+    location.reload();
+  }
+}
+
+function csvCell(v) { return '"' + String(v || '').replaceAll('"', '""') + '"'; }
+
+function exportCSV() {
+  let rows = [
+    ['الفرع', branch.value],
+    ['التاريخ', date.value],
+    ['اسم المفتش', inspector.value],
+    ['الوردية', shift.value],
+    [],
+    ['#', 'البند', 'تم', 'ملاحظات', 'الأولوية']
+  ];
+  document.querySelectorAll('tr[data-task]').forEach(r => {
+    rows.push([
+      r.children[0].innerText,
+      r.children[1].innerText,
+      r.querySelector('input').checked ? 'تم' : 'لم يتم',
+      r.querySelector('textarea').value,
+      r.children[4].innerText
+    ]);
+  });
+  rows.push([], ['ملاحظات ختامية', finalNotes.value], ['التوقيع', signature.value]);
+  let csv = '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\n');
+  let a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = 'outfit-daily-checklist.csv';
+  a.click();
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 4000);
+}
+
+async function submitToSupabase() {
+  const branch_name = document.getElementById('branch').value.trim();
+  const checklist_date = document.getElementById('date').value;
+  const submitted_by = document.getElementById('inspector').value.trim();
+
+  if (!branch_name || !checklist_date || !submitted_by) {
+    showToast('يرجى تعبئة الفرع والتاريخ واسم المفتش أولاً', 'error');
+    return;
+  }
+
+  const rows = [];
+  document.querySelectorAll('tr[data-task]').forEach(r => {
+    const item_no = parseInt(r.children[0].innerText.trim(), 10);
+    const item_text = r.children[1].innerText.trim();
+    const checked = r.querySelector('input[type="checkbox"]').checked;
+    const status = checked ? 'تم' : 'لم يتم';
+    const remarks = r.querySelector('textarea').value.trim();
+
+    if (checked || remarks) {
+      rows.push({ branch_name, checklist_date, submitted_by, item_no, item_text, status, remarks });
+    }
+  });
+
+  if (rows.length === 0) {
+    showToast('لا توجد بنود محددة أو ملاحظات لإرسالها', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ جارٍ الإرسال...';
+
+  const { error } = await supabase.from('checklist_submissions').insert(rows);
+
+  btn.disabled = false;
+  btn.textContent = '💾 حفظ وإرسال إلى قاعدة البيانات';
+
+  if (error) {
+    console.error(error);
+    showToast('خطأ في الإرسال: ' + error.message, 'error');
+  } else {
+    showToast(`✅ تم إرسال ${rows.length} بنداً بنجاح`, 'success');
+  }
+}
+
+window.clearForm = clearForm;
+window.exportCSV = exportCSV;
+window.submitToSupabase = submitToSupabase;
+
 load();
 </script>
-</body></html>
+</body>
+</html>
